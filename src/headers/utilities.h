@@ -5,8 +5,10 @@
  * Bayesian network example, and are just translations from his original
  * python code. The article can be found at http://derandomized.com/post/20009997725/bayes-net-example-with-python-and-khanacademy 
  * and all credit goes to him for the work on those. The expandVertically 
- * and expandHorizontally are functions to handle numpy's broadcast functionality, 
- * which were used in Kohlmeier's original code.
+ * and expandHorizontally functions were written to mimic numpy's broadcast functionality
+ * being used in Kohlmeier's original python code. They basically reshape the target matrix
+ * but fill in the resulting new space with copies of the original content, making multiplication
+ * with matrices with otherwise incompatible dimensions possible.
  */
 
 #ifndef THETA_H
