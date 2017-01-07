@@ -1,3 +1,14 @@
+/*
+ * Class representing a Bayesian Network. Currently only serves as the
+ * model where data is stored and true probabilities based on actual,
+ * observed data are recorded.
+ *
+ * Also contains methods to simulate data based on the probabilites recorded.
+ * These are simply translations of functions from Jace Kohlmeiers Bayesian 
+ * network example written in python and all credit for those functions goes to him.
+ * The article can be found at http://derandomized.com/post/20009997725/bayes-net-example-with-python-and-khanacademy.
+ */
+
 #ifndef NETWORK_H
 #define NETWORK_H
 
