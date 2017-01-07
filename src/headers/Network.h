@@ -4,7 +4,7 @@
  * observed data are recorded.
  *
  * Also contains methods to simulate data based on the probabilites recorded.
- * These are simply translations of functions from Jace Kohlmeiers Bayesian 
+ * These are simply translations of functions from Jace Kohlmeier's Bayesian 
  * network example written in python and all credit for those functions goes to him.
  * The article can be found at http://derandomized.com/post/20009997725/bayes-net-example-with-python-and-khanacademy.
  */
