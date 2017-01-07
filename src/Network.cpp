@@ -43,7 +43,6 @@ void Network::appendCols(umat* target, umat* addon) {
     target->insert_cols(target->n_cols, *addon);
 }
 
-//umat Network::simulateHiddenData(const double* thetaHidden, const int samples) {
 umat Network::simulateHiddenData(const int samples) {
 
     mat random = mat(1, samples, fill::randu);
@@ -53,7 +52,6 @@ umat Network::simulateHiddenData(const int samples) {
 
 }
 
-//umat Network::simulateVisibleData(umat dataHidden, const mat* thetaVisible, const int samples) {
 umat Network::simulateVisibleData(umat dataHidden, const int samples) {
 
     mat colZero = trans(thetaVisible.col(0));

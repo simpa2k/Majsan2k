@@ -20,9 +20,7 @@ int main() {
     double thetaHidden = network.getThetaHidden();
     mat thetaVisible = network.getThetaVisible();
 
-    //umat dataHidden = network.simulateHiddenData(&thetaHidden, rowcount);
     umat dataHidden = network.simulateHiddenData(rowcount);
-    //umat dataVisible = network.simulateVisibleData(trans(dataHidden), &thetaVisible, rowcount);
     umat dataVisible = network.simulateVisibleData(trans(dataHidden), rowcount);
 
     dataHidden.imbue( [&]() { return rand() % 2; } ); 

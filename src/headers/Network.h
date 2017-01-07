@@ -36,9 +36,7 @@ class Network {
     umat* getDataHidden();  
     umat* getDataVisible();
 
-    //umat simulateHiddenData(const double*, const int);
     umat simulateHiddenData(const int);
-    //umat simulateVisibleData(umat, const mat*, const int);
     umat simulateVisibleData(umat, const int);
 
     void update(umat*, umat*);
