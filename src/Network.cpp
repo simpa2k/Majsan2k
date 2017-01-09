@@ -73,7 +73,7 @@ umat Network::simulateVisibleData(umat dataHidden, const int samples) {
 
 void Network::update(umat* dataHidden, umat* dataVisible) {
 
-    if(!this->dataHidden) {
+    /*if(!this->dataHidden) {
         this->dataHidden = dataHidden;
     } else {
         appendCols(this->dataHidden, dataHidden);
@@ -86,6 +86,33 @@ void Network::update(umat* dataHidden, umat* dataVisible) {
     }
 
     thetaHidden = computeThetaHidden(this->dataHidden);
+    thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);*/
+
+    updateHidden(dataHidden)
+    updateVisible(datavisible);
+
+}
+
+void Network::updateHidden(umat* dataHidden) {
+    
+    if(!this->dataHidden) {
+        this->dataHidden = dataHidden;
+    } else {
+        appendCols(this->dataHidden, dataHidden);
+    }
+
+    thetaHidden = computeThetaHidden(this->dataHidden);
+
+}
+
+void Network::updateVisible(umat* dataVisible) {
+    
+    if(!this->datavisible) {
+        this->dataVisible = dataVisible;
+    } else {
+        appendRows(this->dataVisible, dataVisible);
+    }
+
     thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);
 
 }

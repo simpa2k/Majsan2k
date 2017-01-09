@@ -40,6 +40,8 @@ class Network {
     umat simulateVisibleData(umat, const int);
 
     void update(umat*, umat*);
+    void updateHidden(umat*);
+    void updateVisible(umat*);
 
 };
 
