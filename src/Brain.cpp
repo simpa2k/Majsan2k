@@ -38,9 +38,9 @@ double Brain::learn(umat dataHidden, umat dataVisible) {
        
        imputeHiddenNode(&dataHidden, &dataVisible, thetaHidden, thetaVisible); 
 
-       if (computeThetaHidden(&dataHidden) < 0.5) {
+       /*if (computeThetaHidden(&dataHidden) < 0.5) {
            dataHidden = 1 - dataHidden;
-       }
+       }*/
 
        thetaHidden = computeThetaHidden(&dataHidden);
        thetaVisible = computeThetaVisible(&dataHidden, &dataVisible);

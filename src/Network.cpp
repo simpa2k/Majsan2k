@@ -7,7 +7,7 @@ using namespace arma;
 
 Network::Network() {
 
-    thetaHidden = 0.75;
+    thetaHidden = 0.15;
     thetaVisible = { {0.55, 0.95},
                      {0.60, 0.95},
                      {0.24, 0.42},
@@ -88,8 +88,8 @@ void Network::update(umat* dataHidden, umat* dataVisible) {
     thetaHidden = computeThetaHidden(this->dataHidden);
     thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);*/
 
-    updateHidden(dataHidden)
-    updateVisible(datavisible);
+    updateHidden(dataHidden);
+    updateVisible(dataVisible);
 
 }
 
@@ -107,12 +107,14 @@ void Network::updateHidden(umat* dataHidden) {
 
 void Network::updateVisible(umat* dataVisible) {
     
-    if(!this->datavisible) {
+    if(!this->dataVisible) {
         this->dataVisible = dataVisible;
     } else {
         appendRows(this->dataVisible, dataVisible);
     }
 
-    thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);
+    //this->dataHidden->print();
+    //this->dataVisible->print();
+    //thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);
 
 }

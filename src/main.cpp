@@ -30,48 +30,12 @@ void simulatedRun() {
 
 }
 
-void realisticRun() {
-
-    Network network = Network();
-    Brain brain = Brain(400);
-
-    for (int i = 0; int i < 5; ++i) {
-        gatherVisibleData(network);
-        gatherHiddenData(network);
-    }
-
-    double thetaLearned;
-
-    for (int i = 0; int i < 100; ++i) {
-        
-        umat visibleData = gatherVisibleData(network);
-        thetaLearned = brain.learn(*network.getDataHidden(), *network.getDataVisible());
-
-        if (thetaLearned > 0.5) {
-            cout << "Next hidden will be 1." << endl;
-        } else if (thetaLearned < 0.5) {
-            cout << "Next hidden will be 0." << endl;
-        } else {
-            cout << "Both 1 and 0 equally likely." << endl;
-        }
-
-        int result = computeThetaHidden(&visibleData) > 0.5 ? 1 : 0;
-
-        umat hiddenData = umat(1, 1);
-        hiddenData.fill(result);
-        network.updateHidden(hiddenData);
-
-        cout << "Result was: " << result << endl;
-        
-    }
-}
-
-umat gatherVisibleData(Network* network) {
+umat* gatherVisibleData(Network* network) {
     
-    umat visibleData = mat(1, 5);
-    visibleData.imbue( []() { return rand() % 2; } );
+    umat* visibleData = new umat(1, 5);
+    visibleData->imbue( []() { return rand() % 2; } );
 
-    network.updateVisible(visibleData);
+    network->updateVisible(visibleData);
 
     return visibleData;
 
@@ -79,15 +43,66 @@ umat gatherVisibleData(Network* network) {
 
 int gatherHiddenData(Network* network) {
 
-    umat hiddenData = mat(1, 1);
+    umat* hiddenData = new umat(1, 1);
 
     int random = rand() % 2;
-    hiddenData.imbue( []() { return random; } );
+    hiddenData->imbue( [=]() { return random; } );
 
-    network.updateHidden(hiddenData);
+    network->updateHidden(hiddenData);
 
     return random;
     
+}
+
+void realisticRun() {
+
+    Network network = Network();
+    Brain brain = Brain(100);
+
+    for (int i = 0; i < 5; ++i) {
+        gatherHiddenData(&network);
+        gatherVisibleData(&network);
+    }
+
+    cout << network.getThetaHidden() << endl;
+
+    double thetaLearned;
+    double correctGuesses = 0;
+
+    for (int i = 0; i < 1000; ++i) {
+        
+        umat* visibleData = gatherVisibleData(&network);
+
+        umat* tempHidden = new umat(1, 1);
+        tempHidden->imbue( []() { return rand() % 2; } );
+
+        umat* hiddenData = network.getDataHidden();
+        tempHidden->insert_cols(tempHidden->n_rows, *hiddenData);
+
+        thetaLearned = brain.learn(*tempHidden, *network.getDataVisible());
+
+        int guess = thetaLearned > 0.5 ? 1 : 0;
+        /*if (thetaLearned > 0.5) {
+            cout << "Next hidden will be 1." << endl;
+        } else if (thetaLearned < 0.5) {
+            cout << "Next hidden will be 0." << endl;
+        } else {
+            cout << "Both 1 and 0 equally likely." << endl;
+        }*/
+
+        int result = computeThetaHidden(visibleData) < 0.3 ? 1 : 0;
+
+        umat* resultingData = new umat(1, 1);
+        resultingData->fill(result);
+        network.updateHidden(resultingData);
+
+        if (guess == result) {
+            correctGuesses++;
+        }
+        
+    }
+    cout << thetaLearned << endl;
+    cout << correctGuesses << endl;
 }
 
 int main() {
@@ -95,6 +110,8 @@ int main() {
     srand(time(0));
     arma_rng::set_seed_random();
 
+    realisticRun();
+    //simulatedRun();
 
     return 0;
 
