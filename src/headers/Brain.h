@@ -18,10 +18,10 @@ using namespace arma;
 class Brain {
 
     int learningIterations;
-    void imputeHiddenNode(umat*, umat*, double, mat);
 
   public:
     Brain(int);
+    mat imputeHiddenNode(umat*, double, mat, bool);
     double learn(umat, umat);
 
 };

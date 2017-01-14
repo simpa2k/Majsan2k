@@ -29,9 +29,12 @@ class Network {
 
   public:
     Network();
+    Network(double, mat);
 
     double getThetaHidden();  
     mat getThetaVisible();
+
+    void updateThetaVisible();
 
     umat* getDataHidden();  
     umat* getDataVisible();

@@ -10,12 +10,19 @@ using namespace arma;
 
 void simulatedRun() {
 
+    double thetaHidden = 0.75;
+    mat thetaVisible = { {0.55, 0.95},
+                         {0.60, 0.95},
+                         {0.24, 0.42},
+                         {0.13, 0.72},
+                         {0.62, 0.66} };
+
     int rowcount = 10000;
 
-    Network network = Network();
+    Network network = Network(thetaHidden, thetaVisible);
 
-    double thetaHidden = network.getThetaHidden();
-    mat thetaVisible = network.getThetaVisible();
+    thetaHidden = network.getThetaHidden();
+    thetaVisible = network.getThetaVisible();
 
     umat dataHidden = network.simulateHiddenData(rowcount);
     umat dataVisible = network.simulateVisibleData(trans(dataHidden), rowcount);
@@ -30,79 +37,139 @@ void simulatedRun() {
 
 }
 
-umat* gatherVisibleData(Network* network) {
+umat gatherVisibleData(Network* network) {
     
-    umat* visibleData = new umat(1, 5);
-    visibleData->imbue( []() { return rand() % 2; } );
+    umat hiddenData = network->simulateHiddenData(1);
+    umat visibleData = network->simulateVisibleData(hiddenData, 1);
 
-    network->updateVisible(visibleData);
+    network->updateVisible(&visibleData);
 
     return visibleData;
 
 }
 
-int gatherHiddenData(Network* network) {
-
-    umat* hiddenData = new umat(1, 1);
-
-    int random = rand() % 2;
-    hiddenData->imbue( [=]() { return random; } );
-
-    network->updateHidden(hiddenData);
-
-    return random;
+umat gatherHiddenData(Network* network) {
     
+    umat hiddenData = network->simulateHiddenData(1);
+    network->updateHidden(&hiddenData);
+
+    return hiddenData;
+
 }
+
 
 void realisticRun() {
 
-    Network network = Network();
-    Brain brain = Brain(100);
+    double thetaHidden = 0.75;
+    mat thetaVisible = { {0.55, 0.95},
+                         {0.60, 0.95},
+                         {0.24, 0.42},
+                         {0.13, 0.72},
+                         {0.62, 0.66} };
+
+    Network network = Network(thetaHidden, thetaVisible);
+    Brain brain = Brain(400);
+
+    umat hiddenData = network.simulateHiddenData(1000);
+    umat visibleData = network.simulateVisibleData(trans(hiddenData), 1000);
+
+    network.update(&hiddenData, &visibleData);
+    
+    double thetaLearned = brain.learn(*network.getDataHidden(), *network.getDataVisible());
+
+    std::cout << thetaLearned << std::endl;
+    std::cout << "Starting loop." << std::endl << std::endl;
+
+    for (int i = 0; i < 10; ++i) {
+
+        umat newVisibleData = gatherVisibleData(&network);
+
+        mat guess = brain.imputeHiddenNode(&newVisibleData, network.getThetaHidden(), network.getThetaVisible(), false);
+
+        std::cout << "Guess: ";
+        guess.print();
+        cout << std::endl;
+
+        gatherHiddenData(&network);
+        network.updateThetaVisible();
+
+        mat actual = brain.imputeHiddenNode(&newVisibleData, network.getThetaHidden(), network.getThetaVisible(), false);
+
+        std::cout << "Actual: ";
+        actual.print(); 
+        cout << std::endl;
+
+    }
+
+}
+
+umat gatherPredictableVisibleData(Network* network, umat hiddenData) {
+
+    umat* visibleData; 
+
+    if (hiddenData(0, 0) == 1) {
+       visibleData = new umat(1, 5, fill::ones);
+    } else {
+        visibleData = new umat(1, 5, fill::zeros);
+    }
+
+    network->updateVisible(visibleData);
+
+    return *visibleData;
+
+}
+
+umat* gatherPredictableHiddenData() {
+    
+    umat* hiddenData = new umat(1, 1);
+    hiddenData->imbue( []() { return rand() % 2; } );
+
+    return hiddenData;
+    
+}
+
+void gatherPredictableData(Network* network) {
 
     for (int i = 0; i < 5; ++i) {
-        gatherHiddenData(&network);
-        gatherVisibleData(&network);
+        
+        umat* hiddenData = gatherPredictableHiddenData();
+        umat visibleData = gatherPredictableVisibleData(network, *hiddenData);
+
+        network->updateHidden(hiddenData);
+
     }
 
-    cout << network.getThetaHidden() << endl;
+    network->updateThetaVisible();
 
-    double thetaLearned;
-    double correctGuesses = 0;
+}
 
-    for (int i = 0; i < 1000; ++i) {
-        
-        umat* visibleData = gatherVisibleData(&network);
+void predictableRun() {
 
-        umat* tempHidden = new umat(1, 1);
-        tempHidden->imbue( []() { return rand() % 2; } );
+    Network network = Network();
+    Brain brain = Brain(400);
+    
+    gatherPredictableData(&network);
 
-        umat* hiddenData = network.getDataHidden();
-        tempHidden->insert_cols(tempHidden->n_rows, *hiddenData);
+    for (int i = 0; i < 10; ++i) {
 
-        thetaLearned = brain.learn(*tempHidden, *network.getDataVisible());
+        umat* newHiddenData = gatherPredictableHiddenData();
+        umat newVisibleData = gatherPredictableVisibleData(&network, *newHiddenData);
 
-        int guess = thetaLearned > 0.5 ? 1 : 0;
-        /*if (thetaLearned > 0.5) {
-            cout << "Next hidden will be 1." << endl;
-        } else if (thetaLearned < 0.5) {
-            cout << "Next hidden will be 0." << endl;
-        } else {
-            cout << "Both 1 and 0 equally likely." << endl;
-        }*/
+        mat guess = brain.imputeHiddenNode(&newVisibleData, network.getThetaHidden(), network.getThetaVisible(), false);
 
-        int result = computeThetaHidden(visibleData) < 0.3 ? 1 : 0;
+        std::cout << "Guess: ";
+        guess.print();
+        cout << std::endl;
 
-        umat* resultingData = new umat(1, 1);
-        resultingData->fill(result);
-        network.updateHidden(resultingData);
+        network.updateHidden(newHiddenData);
+        network.updateThetaVisible();
 
-        if (guess == result) {
-            correctGuesses++;
-        }
-        
+        std::cout << "Actual: "; 
+        newHiddenData->print();
+        cout << endl;
+
     }
-    cout << thetaLearned << endl;
-    cout << correctGuesses << endl;
+    
 }
 
 int main() {
@@ -110,8 +177,9 @@ int main() {
     srand(time(0));
     arma_rng::set_seed_random();
 
-    realisticRun();
+    //realisticRun();
     //simulatedRun();
+    predictableRun();
 
     return 0;
 

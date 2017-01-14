@@ -7,13 +7,13 @@ using namespace arma;
 
 Network::Network() {
 
-    thetaHidden = 0.15;
-    thetaVisible = { {0.55, 0.95},
-                     {0.60, 0.95},
-                     {0.24, 0.42},
-                     {0.13, 0.72},
-                     {0.62, 0.66} };
-    
+    dataHidden = NULL;
+    dataVisible = NULL;
+
+}
+
+Network::Network(double thetaHidden, mat thetaVisible) : thetaHidden(thetaHidden), thetaVisible(thetaVisible) {
+
     dataHidden = NULL;
     dataVisible = NULL;
 
@@ -25,6 +25,10 @@ double Network::getThetaHidden() {
 
 mat Network::getThetaVisible() {
     return thetaVisible;
+}
+
+void Network::updateThetaVisible() {
+    thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);
 }
 
 umat* Network::getDataHidden() {
@@ -73,21 +77,6 @@ umat Network::simulateVisibleData(umat dataHidden, const int samples) {
 
 void Network::update(umat* dataHidden, umat* dataVisible) {
 
-    /*if(!this->dataHidden) {
-        this->dataHidden = dataHidden;
-    } else {
-        appendCols(this->dataHidden, dataHidden);
-    }
-
-    if(!this->dataVisible) {
-        this->dataVisible = dataVisible;
-    } else {
-        appendRows(this->dataVisible, dataVisible);
-    }
-
-    thetaHidden = computeThetaHidden(this->dataHidden);
-    thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);*/
-
     updateHidden(dataHidden);
     updateVisible(dataVisible);
 
@@ -112,9 +101,5 @@ void Network::updateVisible(umat* dataVisible) {
     } else {
         appendRows(this->dataVisible, dataVisible);
     }
-
-    //this->dataHidden->print();
-    //this->dataVisible->print();
-    //thetaVisible = computeThetaVisible(this->dataHidden, this->dataVisible);
 
 }
